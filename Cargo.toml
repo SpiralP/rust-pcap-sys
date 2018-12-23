@@ -1,0 +1,11 @@
+[package]
+name = "rust-pcap-sys"
+version = "0.1.0"
+authors = ["SpiralP <spiral.palmer@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+libc = "0.2.45"
+
+[build-dependencies]
+bindgen = "0.46.0"

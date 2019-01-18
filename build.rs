@@ -47,7 +47,7 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", libdir);
   } else {
     #[cfg(target_os = "windows")]
-    println!("cargo:rustc-link-search=native=./npcap-sdk-1.01/lib/x64");
+    println!("cargo:rustc-link-search=native=./npcap-sdk-1.01/Lib/x64");
 
     #[cfg(target_os = "macos")]
     println!("cargo:rustc-link-search=native=/usr/local/opt/libpcap/lib");

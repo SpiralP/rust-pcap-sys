@@ -10,6 +10,11 @@ mod builder {
   #[cfg(target_os = "windows")]
   pub const HEADER_PATH: &str = "./npcap-sdk-1.01/Include/pcap.h";
 
+  #[cfg(target_os = "macos")]
+  pub const OS: &str = "macos";
+  #[cfg(target_os = "macos")]
+  pub const HEADER_PATH: &str = "/usr/local/opt/libpcap/include/pcap.h";
+
   pub fn build_bindings() {
     use bindgen;
 
@@ -25,6 +30,9 @@ mod builder {
     #[cfg(target_os = "windows")]
     let bindings = bindings.clang_arg("-I./npcap-sdk-1.01/Include");
 
+    #[cfg(target_os = "macos")]
+    let bindings = bindings.clang_arg("-I/usr/local/opt/libpcap/include");
+
     let bindings = bindings.generate().unwrap();
 
     bindings
@@ -37,6 +45,12 @@ fn main() {
   use std::env;
   if let Ok(libdir) = env::var("PCAP_LIBDIR") {
     println!("cargo:rustc-link-search=native={}", libdir);
+  } else {
+    #[cfg(target_os = "windows")]
+    println!("cargo:rustc-link-search=native=./npcap-sdk-1.01/lib/x64");
+
+    #[cfg(target_os = "macos")]
+    println!("cargo:rustc-link-search=native=/usr/local/opt/libpcap/lib");
   }
 
   #[cfg(feature = "bindgen")]

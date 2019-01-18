@@ -666,13 +666,10 @@ fn bindgen_test_layout_pcap_file_header() {
     )
   );
 }
-#[repr(u32)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum pcap_direction_t {
-  PCAP_D_INOUT = 0,
-  PCAP_D_IN = 1,
-  PCAP_D_OUT = 2,
-}
+pub const pcap_direction_t_PCAP_D_INOUT: pcap_direction_t = 0;
+pub const pcap_direction_t_PCAP_D_IN: pcap_direction_t = 1;
+pub const pcap_direction_t_PCAP_D_OUT: pcap_direction_t = 2;
+pub type pcap_direction_t = u32;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct pcap_pkthdr {

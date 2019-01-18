@@ -17,7 +17,6 @@ mod builder {
       .raw_line("#![allow(non_snake_case)]")
       .raw_line("#![allow(non_camel_case_types)]")
       .raw_line("#![allow(non_upper_case_globals)]")
-      .rustified_enum(".*")
       .whitelist_function("pcap.*")
       .whitelist_type("pcap.*")
       .whitelist_var("PCAP.*")

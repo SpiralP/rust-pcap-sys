@@ -34,6 +34,11 @@ mod builder {
 }
 
 fn main() {
+  use std::env;
+  if let Ok(libdir) = env::var("PCAP_LIBDIR") {
+    println!("cargo:rustc-link-search=native={}", libdir);
+  }
+
   #[cfg(feature = "bindgen")]
   self::builder::build_bindings();
 }

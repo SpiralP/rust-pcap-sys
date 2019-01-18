@@ -4,6 +4,55 @@
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 
+pub const PCAP_VERSION_MAJOR: u32 = 2;
+pub const PCAP_VERSION_MINOR: u32 = 4;
+pub const PCAP_ERRBUF_SIZE: u32 = 256;
+pub const PCAP_IF_LOOPBACK: u32 = 1;
+pub const PCAP_IF_UP: u32 = 2;
+pub const PCAP_IF_RUNNING: u32 = 4;
+pub const PCAP_IF_WIRELESS: u32 = 8;
+pub const PCAP_IF_CONNECTION_STATUS: u32 = 48;
+pub const PCAP_IF_CONNECTION_STATUS_UNKNOWN: u32 = 0;
+pub const PCAP_IF_CONNECTION_STATUS_CONNECTED: u32 = 16;
+pub const PCAP_IF_CONNECTION_STATUS_DISCONNECTED: u32 = 32;
+pub const PCAP_IF_CONNECTION_STATUS_NOT_APPLICABLE: u32 = 48;
+pub const PCAP_ERROR: i32 = -1;
+pub const PCAP_ERROR_BREAK: i32 = -2;
+pub const PCAP_ERROR_NOT_ACTIVATED: i32 = -3;
+pub const PCAP_ERROR_ACTIVATED: i32 = -4;
+pub const PCAP_ERROR_NO_SUCH_DEVICE: i32 = -5;
+pub const PCAP_ERROR_RFMON_NOTSUP: i32 = -6;
+pub const PCAP_ERROR_NOT_RFMON: i32 = -7;
+pub const PCAP_ERROR_PERM_DENIED: i32 = -8;
+pub const PCAP_ERROR_IFACE_NOT_UP: i32 = -9;
+pub const PCAP_ERROR_CANTSET_TSTAMP_TYPE: i32 = -10;
+pub const PCAP_ERROR_PROMISC_PERM_DENIED: i32 = -11;
+pub const PCAP_ERROR_TSTAMP_PRECISION_NOTSUP: i32 = -12;
+pub const PCAP_WARNING: u32 = 1;
+pub const PCAP_WARNING_PROMISC_NOTSUP: u32 = 2;
+pub const PCAP_WARNING_TSTAMP_TYPE_NOTSUP: u32 = 3;
+pub const PCAP_NETMASK_UNKNOWN: u32 = 4294967295;
+pub const PCAP_TSTAMP_HOST: u32 = 0;
+pub const PCAP_TSTAMP_HOST_LOWPREC: u32 = 1;
+pub const PCAP_TSTAMP_HOST_HIPREC: u32 = 2;
+pub const PCAP_TSTAMP_ADAPTER: u32 = 3;
+pub const PCAP_TSTAMP_ADAPTER_UNSYNCED: u32 = 4;
+pub const PCAP_TSTAMP_PRECISION_MICRO: u32 = 0;
+pub const PCAP_TSTAMP_PRECISION_NANO: u32 = 1;
+pub const PCAP_BUF_SIZE: u32 = 1024;
+pub const PCAP_SRC_FILE: u32 = 2;
+pub const PCAP_SRC_IFLOCAL: u32 = 3;
+pub const PCAP_SRC_IFREMOTE: u32 = 4;
+pub const PCAP_SRC_FILE_STRING: &'static [u8; 8usize] = b"file://\0";
+pub const PCAP_SRC_IF_STRING: &'static [u8; 9usize] = b"rpcap://\0";
+pub const PCAP_OPENFLAG_PROMISCUOUS: u32 = 1;
+pub const PCAP_OPENFLAG_DATATX_UDP: u32 = 2;
+pub const PCAP_OPENFLAG_NOCAPTURE_RPCAP: u32 = 4;
+pub const PCAP_OPENFLAG_NOCAPTURE_LOCAL: u32 = 8;
+pub const PCAP_OPENFLAG_MAX_RESPONSIVENESS: u32 = 16;
+pub const PCAP_SAMP_NOSAMP: u32 = 0;
+pub const PCAP_SAMP_1_EVERY_N: u32 = 1;
+pub const PCAP_SAMP_FIRST_AFTER_N_MS: u32 = 2;
 pub type __u_char = ::std::os::raw::c_uchar;
 pub type __u_short = ::std::os::raw::c_ushort;
 pub type __u_int = ::std::os::raw::c_uint;
@@ -54,6 +103,7 @@ fn bindgen_test_layout_timeval() {
     )
   );
 }
+pub type bpf_int32 = ::std::os::raw::c_int;
 pub type bpf_u_int32 = u_int;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -521,10 +571,108 @@ pub struct pcap_dumper {
 }
 pub type pcap_dumper_t = pcap_dumper;
 pub type pcap_if_t = pcap_if;
-pub const pcap_direction_t_PCAP_D_INOUT: pcap_direction_t = 0;
-pub const pcap_direction_t_PCAP_D_IN: pcap_direction_t = 1;
-pub const pcap_direction_t_PCAP_D_OUT: pcap_direction_t = 2;
-pub type pcap_direction_t = u32;
+pub type pcap_addr_t = pcap_addr;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct pcap_file_header {
+  pub magic: bpf_u_int32,
+  pub version_major: u_short,
+  pub version_minor: u_short,
+  pub thiszone: bpf_int32,
+  pub sigfigs: bpf_u_int32,
+  pub snaplen: bpf_u_int32,
+  pub linktype: bpf_u_int32,
+}
+#[test]
+fn bindgen_test_layout_pcap_file_header() {
+  assert_eq!(
+    ::std::mem::size_of::<pcap_file_header>(),
+    24usize,
+    concat!("Size of: ", stringify!(pcap_file_header))
+  );
+  assert_eq!(
+    ::std::mem::align_of::<pcap_file_header>(),
+    4usize,
+    concat!("Alignment of ", stringify!(pcap_file_header))
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<pcap_file_header>())).magic as *const _ as usize },
+    0usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(pcap_file_header),
+      "::",
+      stringify!(magic)
+    )
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<pcap_file_header>())).version_major as *const _ as usize },
+    4usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(pcap_file_header),
+      "::",
+      stringify!(version_major)
+    )
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<pcap_file_header>())).version_minor as *const _ as usize },
+    6usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(pcap_file_header),
+      "::",
+      stringify!(version_minor)
+    )
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<pcap_file_header>())).thiszone as *const _ as usize },
+    8usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(pcap_file_header),
+      "::",
+      stringify!(thiszone)
+    )
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<pcap_file_header>())).sigfigs as *const _ as usize },
+    12usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(pcap_file_header),
+      "::",
+      stringify!(sigfigs)
+    )
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<pcap_file_header>())).snaplen as *const _ as usize },
+    16usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(pcap_file_header),
+      "::",
+      stringify!(snaplen)
+    )
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<pcap_file_header>())).linktype as *const _ as usize },
+    20usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(pcap_file_header),
+      "::",
+      stringify!(linktype)
+    )
+  );
+}
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum pcap_direction_t {
+  PCAP_D_INOUT = 0,
+  PCAP_D_IN = 1,
+  PCAP_D_OUT = 2,
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct pcap_pkthdr {

@@ -30,3 +30,11 @@ build: false
 cache:
   - C:\Users\appveyor\.cargo\registry
   - target
+
+branches:
+  only:
+    - master
+
+notifications:
+  - provider: Email
+    on_build_success: false

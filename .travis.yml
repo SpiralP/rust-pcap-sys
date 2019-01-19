@@ -1,0 +1,38 @@
+language: rust
+rust:
+  - stable
+  - nightly
+
+addons:
+  apt:
+    packages:
+      - libpcap-dev
+
+before_install:
+  - set -e
+  - rustup self update
+
+install:
+  - rustup update
+  - source ~/.cargo/env || true
+  - rustc -vV
+  - cargo -vV
+
+script:
+  - cargo test -- --nocapture
+
+after_script: set +e
+
+cache: cargo
+
+before_cache:
+  # Travis can't cache files that are not readable by "others"
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    on_success: never

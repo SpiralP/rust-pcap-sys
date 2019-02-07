@@ -1,19 +1,19 @@
 language: rust
 rust:
-  - stable
   - nightly
+#  - stable
 
 os:
   - linux
-  - osx
+#  - osx
 
 addons:
   apt:
     packages:
       - libpcap-dev
-  homebrew:
-    packages:
-      - libpcap
+#  homebrew:
+#    packages:
+#      - libpcap
 
 script:
   - cargo test -- --nocapture

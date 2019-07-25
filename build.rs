@@ -16,8 +16,6 @@ mod builder {
   pub const HEADER_PATH: &str = "/usr/local/opt/libpcap/include/pcap.h";
 
   pub fn build_bindings() {
-    use bindgen;
-
     let bindings = bindgen::builder()
       .raw_line("#![allow(non_snake_case)]")
       .raw_line("#![allow(non_camel_case_types)]")

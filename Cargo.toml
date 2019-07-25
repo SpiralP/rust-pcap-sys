@@ -5,4 +5,4 @@ authors = ["SpiralP <spiral.palmer@gmail.com>"]
 edition = "2018"
 
 [build-dependencies]
-bindgen = { version = "0.46.0", optional = true }
+bindgen = { version = "0.50.0", optional = true }

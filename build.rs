@@ -41,9 +41,14 @@ mod builder {
 
 fn main() {
   use std::env;
+
   if let Ok(libdir) = env::var("PCAP_LIBDIR") {
     println!("cargo:rustc-link-search=native={}", libdir);
   } else {
+    // this "./npcap-sdk-1.03/Lib/x64" path won't work for other crates!!
+    // so use PCAP_LIBDIR!
+    // TODO maybe copy .libs to OUT?
+    // also you need to set PATH to point to "Windows\System32\Npcap" (x64)
     #[cfg(target_os = "windows")]
     println!("cargo:rustc-link-search=native=./npcap-sdk-1.03/Lib/x64");
 

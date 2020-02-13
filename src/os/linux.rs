@@ -3,6 +3,9 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
+#![allow(clippy::unreadable_literal)]
+#![allow(clippy::cognitive_complexity)]
+#![allow(clippy::redundant_static_lifetimes)]
 
 pub const PCAP_VERSION_MAJOR: u32 = 2;
 pub const PCAP_VERSION_MINOR: u32 = 4;
@@ -64,6 +67,7 @@ pub type __suseconds_t = ::std::os::raw::c_long;
 pub type u_char = __u_char;
 pub type u_short = __u_short;
 pub type u_int = __u_int;
+pub type size_t = ::std::os::raw::c_ulong;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct timeval {
@@ -100,6 +104,46 @@ fn bindgen_test_layout_timeval() {
       stringify!(timeval),
       "::",
       stringify!(tv_usec)
+    )
+  );
+}
+pub type sa_family_t = ::std::os::raw::c_ushort;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct sockaddr {
+  pub sa_family: sa_family_t,
+  pub sa_data: [::std::os::raw::c_char; 14usize],
+}
+#[test]
+fn bindgen_test_layout_sockaddr() {
+  assert_eq!(
+    ::std::mem::size_of::<sockaddr>(),
+    16usize,
+    concat!("Size of: ", stringify!(sockaddr))
+  );
+  assert_eq!(
+    ::std::mem::align_of::<sockaddr>(),
+    2usize,
+    concat!("Alignment of ", stringify!(sockaddr))
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<sockaddr>())).sa_family as *const _ as usize },
+    0usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(sockaddr),
+      "::",
+      stringify!(sa_family)
+    )
+  );
+  assert_eq!(
+    unsafe { &(*(::std::ptr::null::<sockaddr>())).sa_data as *const _ as usize },
+    2usize,
+    concat!(
+      "Offset of field: ",
+      stringify!(sockaddr),
+      "::",
+      stringify!(sa_data)
     )
   );
 }
@@ -251,7 +295,7 @@ pub struct _IO_FILE {
   pub _wide_data: *mut _IO_wide_data,
   pub _freeres_list: *mut _IO_FILE,
   pub _freeres_buf: *mut ::std::os::raw::c_void,
-  pub __pad5: usize,
+  pub __pad5: size_t,
   pub _mode: ::std::os::raw::c_int,
   pub _unused2: [::std::os::raw::c_char; 20usize],
 }
@@ -1107,7 +1151,7 @@ extern "C" {
   pub fn pcap_inject(
     arg1: *mut pcap_t,
     arg2: *const ::std::os::raw::c_void,
-    arg3: usize,
+    arg3: size_t,
   ) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -1185,6 +1229,11 @@ extern "C" {
 }
 extern "C" {
   pub fn pcap_datalink_val_to_description(
+    arg1: ::std::os::raw::c_int,
+  ) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+  pub fn pcap_datalink_val_to_description_or_dlt(
     arg1: ::std::os::raw::c_int,
   ) -> *const ::std::os::raw::c_char;
 }
@@ -1342,7 +1391,7 @@ extern "C" {
 }
 extern "C" {
   pub fn pcap_findalldevs_ex(
-    source: *mut ::std::os::raw::c_char,
+    source: *const ::std::os::raw::c_char,
     auth: *mut pcap_rmtauth,
     alldevs: *mut *mut pcap_if_t,
     errbuf: *mut ::std::os::raw::c_char,
@@ -1416,9 +1465,4 @@ extern "C" {
 }
 extern "C" {
   pub fn pcap_remoteact_cleanup();
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct sockaddr {
-  pub _address: u8,
 }

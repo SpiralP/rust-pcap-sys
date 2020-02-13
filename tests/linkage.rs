@@ -1,5 +1,3 @@
-use pcap_sys;
-
 #[test]
 fn test_linkage() {
   unsafe {

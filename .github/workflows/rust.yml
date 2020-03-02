@@ -1,0 +1,86 @@
+name: Rust
+
+on: [push]
+
+jobs:
+  build_linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install deps
+        run: sudo apt-get -y update && sudo apt-get -y install libpcap-dev
+
+      - name: Install nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+      - name: Build docs
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/doc
+
+  build_windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install deps
+        run: |
+          iwr -useb get.scoop.sh | iex
+          echo "##[add-path]$HOME\scoop\shims"
+          echo "##[add-path]C:\ProgramData\scoop\shims"
+          scoop install aria2
+          scoop install 7zip curl
+          curl "https://nmap.org/npcap/dist/npcap-sdk-1.01.zip" > npcap-sdk-1.01.zip
+          7z x -onpcap-sdk-1.01 npcap-sdk-1.01.zip
+          echo "::set-env name=PCAP_LIBDIR::npcap-sdk-1.01\Lib\x64"
+          curl "https://nmap.org/npcap/dist/npcap-0.99-r8.exe" > npcap-0.99-r8.exe
+          7z x -y "npcap-0.99-r8.exe" '$SYSDIR\wpcap.dll' '$SYSDIR\Packet.dll'
+          echo '##[add-path].\$SYSDIR'
+
+      - name: Install nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+  build_mac:
+    runs-on: macOS-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install deps
+        run: brew install libpcap
+
+      - name: Install nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build

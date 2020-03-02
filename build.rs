@@ -1,3 +1,5 @@
+use std::env;
+
 #[cfg(feature = "bindgen")]
 mod builder {
   #[cfg(target_os = "linux")]
@@ -43,8 +45,6 @@ mod builder {
 }
 
 fn main() {
-  use std::env;
-
   if let Ok(libdir) = env::var("PCAP_LIBDIR") {
     println!("cargo:rustc-link-search=native={}", libdir);
   } else {

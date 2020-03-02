@@ -47,11 +47,11 @@ jobs:
           echo "##[add-path]C:\ProgramData\scoop\shims"
           scoop install aria2
           scoop install 7zip curl
-          curl "https://nmap.org/npcap/dist/npcap-sdk-1.01.zip" > npcap-sdk-1.01.zip
+          curl 'https://nmap.org/npcap/dist/npcap-sdk-1.01.zip' -o npcap-sdk-1.01.zip
           7z x -onpcap-sdk-1.01 npcap-sdk-1.01.zip
-          echo "::set-env name=PCAP_LIBDIR::npcap-sdk-1.01\Lib\x64"
-          curl "https://nmap.org/npcap/dist/npcap-0.99-r8.exe" > npcap-0.99-r8.exe
-          7z x -y "npcap-0.99-r8.exe" '$SYSDIR\wpcap.dll' '$SYSDIR\Packet.dll'
+          echo '::set-env name=PCAP_LIBDIR::npcap-sdk-1.01\Lib\x64'
+          curl 'https://nmap.org/npcap/dist/npcap-0.99-r8.exe' -o npcap-0.99-r8.exe
+          7z x -y 'npcap-0.99-r8.exe' '$SYSDIR\wpcap.dll' '$SYSDIR\Packet.dll'
           echo '##[add-path].\$SYSDIR'
 
       - name: Install nightly

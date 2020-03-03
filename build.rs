@@ -1,4 +1,7 @@
-use std::{env, path::PathBuf};
+use std::{
+  env, fs,
+  path::{Path, PathBuf},
+};
 
 #[cfg(target_os = "linux")]
 pub const INCLUDE_PATH: &str = "/usr/include";
@@ -15,11 +18,28 @@ fn main() {
   if let Ok(libdir) = env::var("PCAP_LIBDIR") {
     println!("cargo:rustc-link-search=native={}", libdir);
   } else {
-    #[cfg(target_os = "windows")]
-    println!("cargo:rustc-link-search=native=./npcap-sdk/Lib/x64");
-
     #[cfg(target_os = "macos")]
-    println!("cargo:rustc-link-search=native=/usr/local/opt/libpcap/lib");
+    {
+      // check if brew installed
+      println!("cargo:rustc-link-search=native=/usr/local/opt/libpcap/lib");
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+      // copy .lib files to OUT_DIR so that other packages get them
+      let out_dir = env::var("OUT_DIR").unwrap();
+      fs::copy(
+        "./npcap-sdk/Lib/x64/wpcap.lib",
+        Path::new(&out_dir).join("wpcap.lib"),
+      )
+      .expect("copy wpcap.lib");
+      fs::copy(
+        "./npcap-sdk/Lib/x64/Packet.lib",
+        Path::new(&out_dir).join("Packet.lib"),
+      )
+      .expect("copy Packet.lib");
+      println!("cargo:rustc-link-search=native={}", &out_dir);
+    }
   }
 
   #[cfg(not(target_os = "windows"))]

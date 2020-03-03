@@ -1,50 +1,16 @@
-use std::env;
+use std::{env, path::PathBuf};
 
-#[cfg(feature = "bindgen")]
-mod builder {
-  #[cfg(target_os = "linux")]
-  pub const OS: &str = "linux";
-  #[cfg(target_os = "linux")]
-  pub const HEADER_PATH: &str = "/usr/include/pcap.h";
+#[cfg(target_os = "linux")]
+pub const HEADER_PATH: &str = "/usr/include/pcap.h";
 
-  #[cfg(target_os = "windows")]
-  pub const OS: &str = "windows";
-  #[cfg(target_os = "windows")]
-  pub const HEADER_PATH: &str = "./npcap-sdk-1.04/Include/pcap.h";
+#[cfg(target_os = "windows")]
+pub const HEADER_PATH: &str = "./npcap-sdk-1.04/Include/pcap.h";
 
-  #[cfg(target_os = "macos")]
-  pub const OS: &str = "macos";
-  #[cfg(target_os = "macos")]
-  pub const HEADER_PATH: &str = "/usr/local/opt/libpcap/include/pcap.h";
-
-  pub fn build_bindings() {
-    let bindings = bindgen::builder()
-      .raw_line("#![allow(non_snake_case)]")
-      .raw_line("#![allow(non_camel_case_types)]")
-      .raw_line("#![allow(non_upper_case_globals)]")
-      .raw_line("#![allow(clippy::unreadable_literal)]")
-      .raw_line("#![allow(clippy::cognitive_complexity)]")
-      .raw_line("#![allow(clippy::redundant_static_lifetimes)]")
-      .whitelist_function("pcap.*")
-      .whitelist_type("pcap.*")
-      .whitelist_var("PCAP.*")
-      .header(HEADER_PATH);
-
-    #[cfg(target_os = "windows")]
-    let bindings = bindings.clang_arg("-I./npcap-sdk-1.04/Include");
-
-    #[cfg(target_os = "macos")]
-    let bindings = bindings.clang_arg("-I/usr/local/opt/libpcap/include");
-
-    let bindings = bindings.generate().unwrap();
-
-    bindings
-      .write_to_file(&format!("./src/os/{}.rs", OS))
-      .unwrap();
-  }
-}
+#[cfg(target_os = "macos")]
+pub const HEADER_PATH: &str = "/usr/local/opt/libpcap/include/pcap.h";
 
 fn main() {
+  println!("cargo:rerun-if-env-changed=PCAP_LIBDIR");
   if let Ok(libdir) = env::var("PCAP_LIBDIR") {
     println!("cargo:rustc-link-search=native={}", libdir);
   } else {
@@ -59,6 +25,34 @@ fn main() {
     println!("cargo:rustc-link-search=native=/usr/local/opt/libpcap/lib");
   }
 
-  #[cfg(feature = "bindgen")]
-  self::builder::build_bindings();
+  #[cfg(not(target_os = "windows"))]
+  {
+    println!("cargo:rustc-link-lib=pcap");
+  }
+
+  #[cfg(target_os = "windows")]
+  {
+    println!("cargo:rustc-link-lib=wpcap");
+  }
+
+  let bindings = bindgen::builder()
+    .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+    .whitelist_function("pcap.*")
+    .whitelist_type("pcap.*")
+    .whitelist_var("PCAP.*")
+    .header(HEADER_PATH);
+
+  #[cfg(target_os = "windows")]
+  let bindings = bindings.clang_arg("-I./npcap-sdk-1.04/Include");
+
+  #[cfg(target_os = "macos")]
+  let bindings = bindings.clang_arg("-I/usr/local/opt/libpcap/include");
+
+  let bindings = bindings.generate().unwrap();
+
+  // Write the bindings to the $OUT_DIR/bindings.rs file.
+  let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+  bindings
+    .write_to_file(out_path.join("bindings.rs"))
+    .expect("Couldn't write bindings!");
 }

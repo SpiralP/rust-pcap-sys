@@ -1,7 +1,4 @@
-use std::{
-  env, fs,
-  path::{Path, PathBuf},
-};
+use std::{env, path::PathBuf};
 
 #[cfg(target_os = "linux")]
 pub const INCLUDE_PATH: &str = "/usr/include";
@@ -14,6 +11,8 @@ pub const INCLUDE_PATH: &str = "./npcap-sdk/Include";
 pub const INCLUDE_PATH: &str = "/usr/local/opt/libpcap/include";
 
 fn main() {
+  let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+
   println!("cargo:rerun-if-env-changed=PCAP_LIBDIR");
   if let Ok(libdir) = env::var("PCAP_LIBDIR") {
     println!("cargo:rustc-link-search=native={}", libdir);
@@ -26,19 +25,17 @@ fn main() {
 
     #[cfg(target_os = "windows")]
     {
+      use std::fs;
+
       // copy .lib files to OUT_DIR so that other packages get them
-      let out_dir = env::var("OUT_DIR").unwrap();
-      fs::copy(
-        "./npcap-sdk/Lib/x64/wpcap.lib",
-        Path::new(&out_dir).join("wpcap.lib"),
-      )
-      .expect("copy wpcap.lib");
+      fs::copy("./npcap-sdk/Lib/x64/wpcap.lib", out_path.join("wpcap.lib"))
+        .expect("copy wpcap.lib");
       fs::copy(
         "./npcap-sdk/Lib/x64/Packet.lib",
-        Path::new(&out_dir).join("Packet.lib"),
+        out_path.join("Packet.lib"),
       )
       .expect("copy Packet.lib");
-      println!("cargo:rustc-link-search=native={}", &out_dir);
+      println!("cargo:rustc-link-search=native={}", out_path.display());
     }
   }
 
@@ -64,7 +61,6 @@ fn main() {
     .unwrap();
 
   // Write the bindings to the $OUT_DIR/bindings.rs file.
-  let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
   bindings
     .write_to_file(out_path.join("bindings.rs"))
     .expect("Couldn't write bindings!");

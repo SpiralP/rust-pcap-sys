@@ -54,8 +54,8 @@ jobs:
           scoop install aria2
           scoop install llvm
           echo "::set-env name=LIBCLANG_PATH::$HOME\scoop\apps\llvm\current\bin"
-          Invoke-WebRequest -Uri 'https://nmap.org/npcap/dist/npcap-0.9987.exe' -OutFile npcap-0.9987.exe
-          7z x -y 'npcap-0.9987.exe' '$SYSDIR\wpcap.dll' '$SYSDIR\Packet.dll'
+          aria2c 'https://nmap.org/npcap/dist/npcap-0.9987.exe' -o npcap.exe
+          7z x -y 'npcap.exe' '$SYSDIR\wpcap.dll' '$SYSDIR\Packet.dll'
           echo '##[add-path].\$SYSDIR'
 
       - name: Install nightly

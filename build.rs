@@ -1,14 +1,4 @@
-use std::{env, path::PathBuf};
-
-#[cfg(target_os = "linux")]
-pub const INCLUDE_PATH: &str = "/usr/include";
-
-// https://nmap.org/npcap/
-#[cfg(target_os = "windows")]
-pub const INCLUDE_PATH: &str = "./npcap-sdk/Include";
-
-#[cfg(target_os = "macos")]
-pub const INCLUDE_PATH: &str = "/usr/local/opt/libpcap/include";
+use std::{env, fs, path::PathBuf};
 
 fn main() {
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -16,47 +6,65 @@ fn main() {
     println!("cargo:rerun-if-env-changed=PCAP_LIBDIR");
     if let Ok(libdir) = env::var("PCAP_LIBDIR") {
         println!("cargo:rustc-link-search=native={}", libdir);
-    } else {
-        #[cfg(target_os = "macos")]
-        {
-            // check if brew installed
-            println!("cargo:rustc-link-search=native=/usr/local/opt/libpcap/lib");
+    } else if let Ok(library) = pkg_config::probe_library("libpcap") {
+        for path in library.link_paths {
+            println!("cargo:rustc-link-search=native={}", path.display());
         }
-
-        #[cfg(target_os = "windows")]
-        {
-            use std::fs;
-
-            // copy .lib files to OUT_DIR so that other packages get them
-            fs::copy("./npcap-sdk/Lib/x64/wpcap.lib", out_path.join("wpcap.lib"))
-                .expect("copy wpcap.lib");
-            fs::copy(
-                "./npcap-sdk/Lib/x64/Packet.lib",
-                out_path.join("Packet.lib"),
-            )
-            .expect("copy Packet.lib");
-            println!("cargo:rustc-link-search=native={}", out_path.display());
-        }
+    } else if cfg!(target_os = "macos") {
+        // check if brew installed
+        println!("cargo:rustc-link-search=native=/usr/local/opt/libpcap/lib");
+    } else if cfg!(target_os = "windows") {
+        // copy .lib files to OUT_DIR so that other packages get them
+        fs::copy("./npcap-sdk/Lib/x64/wpcap.lib", out_path.join("wpcap.lib"))
+            .expect("copy wpcap.lib");
+        fs::copy(
+            "./npcap-sdk/Lib/x64/Packet.lib",
+            out_path.join("Packet.lib"),
+        )
+        .expect("copy Packet.lib");
+        println!("cargo:rustc-link-search=native={}", out_path.display());
     }
 
-    #[cfg(not(target_os = "windows"))]
-    {
+    if let Ok(library) = pkg_config::probe_library("libpcap") {
+        for name in library.libs {
+            println!("cargo:rustc-link-lib={name}");
+        }
+    } else if cfg!(target_os = "windows") {
         // you also need to have PATH to point to "Windows\System32\Npcap" (x64)
+        println!("cargo:rustc-link-lib=wpcap");
+    } else {
         println!("cargo:rustc-link-lib=pcap");
     }
 
-    #[cfg(target_os = "windows")]
-    {
-        println!("cargo:rustc-link-lib=wpcap");
-    }
+    println!("cargo:rerun-if-env-changed=PCAP_INCLUDEDIR");
+    let dirs = if let Ok(includedir) = env::var("PCAP_INCLUDEDIR") {
+        vec![includedir]
+    } else if let Ok(library) = pkg_config::probe_library("libpcap") {
+        library
+            .include_paths
+            .into_iter()
+            .map(|path| path.to_string_lossy().to_string())
+            .collect()
+    } else if cfg!(target_os = "windows") {
+        // https://nmap.org/npcap/
+        vec!["./npcap-sdk/Include".to_string()]
+    } else if cfg!(target_os = "macos") {
+        vec!["/usr/local/opt/libpcap/include".to_string()]
+    } else {
+        vec!["/usr/include".to_string()]
+    };
 
+    let args = dirs
+        .into_iter()
+        .map(|dir| format!("-I{dir}"))
+        .collect::<Vec<_>>();
     let bindings = bindgen::builder()
-        .clang_args(vec!["-I", INCLUDE_PATH])
+        .clang_args(args)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .allowlist_function("pcap.*")
         .allowlist_type("pcap.*")
         .allowlist_var("PCAP.*")
-        .header(format!("{}/pcap.h", INCLUDE_PATH))
+        .header_contents("main.h", "#include <pcap.h>")
         .generate()
         .unwrap();
 

@@ -1,6 +1,5 @@
-/target
-**/*.rs.bk
-Cargo.lock
+/Cargo.lock
+/npcap-sdk/*.html
 /npcap-sdk/docs
 /npcap-sdk/Examples*
-/npcap-sdk/*.html
+/target
